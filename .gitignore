@@ -1,0 +1,9 @@
+﻿# Datos pesados (no se suben al repo)
+data/
+*.zip
+UCI HAR Dataset/
+
+# Python / Jupyter
+__pycache__/
+.ipynb_checkpoints/
+.venv/
