@@ -1,0 +1,3 @@
+Modelo,Accuracy test,Macro F1 test
+Regresión logística,0.9497794367153037,0.950026075552274
+Random Forest,0.9239904988123515,0.9219906384321904
