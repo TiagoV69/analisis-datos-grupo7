@@ -89,11 +89,37 @@ Los resultados complementarios se encuentran en `resultados_supervisado/`.
 
 ## 6. Aprendizaje no supervisado
 
-Este componente busca descubrir agrupaciones y estructuras en las señales de movimiento sin utilizar las etiquetas de las actividades durante el entrenamiento.
+Este componente descubre estructuras en las señales sin utilizar las etiquetas durante PCA ni durante el entrenamiento de los algoritmos. Se compararon **K-means** y una **mezcla gaussiana (GMM)** sobre los 36 componentes necesarios para conservar el 90,22 % de la varianza. Las actividades reales se consultaron únicamente después de formar los grupos.
 
-Se encuentra asignado al desarrollo del notebook `04_no_supervisado.ipynb`.
+### Selección del número de grupos
 
-Los resultados de esta etapa permitirán complementar el análisis supervisado y estudiar la correspondencia entre los grupos encontrados y las actividades reales.
+Ambos algoritmos obtuvieron su mayor Silhouette Score con dos grupos:
+
+| Algoritmo | Mejor k | Silhouette |
+|---|---:|---:|
+| K-means | 2 | 0,5348 |
+| Mezcla gaussiana | 2 | 0,5236 |
+
+La evaluación posterior mostró que esos dos grupos corresponden casi exactamente a actividades estáticas y dinámicas: K-means alcanzó 99,85 % de correspondencia y GMM 98,49 %. Esto confirma la pregunta de trabajo: distinguir movimiento de reposo es mucho más fácil que separar las seis actividades.
+
+### Correspondencia con las seis actividades
+
+Al fijar `k=6`, sin suministrar las etiquetas al entrenamiento, se obtuvieron los siguientes resultados:
+
+| Algoritmo | Silhouette | ARI | NMI | Pureza | Correspondencia 1:1 |
+|---|---:|---:|---:|---:|---:|
+| K-means | 0,1716 | 0,4612 | 0,5887 | 0,5994 | 0,5994 |
+| Mezcla gaussiana | 0,1133 | 0,4140 | 0,5823 | 0,6269 | 0,5946 |
+
+K-means presentó la mejor separación interna y la mayor correspondencia uno a uno. Los grupos separan claramente lo estático de lo dinámico, pero mezclan actividades similares: `SITTING` con `STANDING` y las tres variantes de caminar. `LAYING` fue la actividad estática más diferenciable.
+
+PCA mejoró el Silhouette de K-means con seis grupos de 0,1313 a 0,1716 respecto a las 561 variables originales. Para visualización, t-SNE conservó mejor las vecindades locales que PCA 2D (*trustworthiness* de 0,9895 frente a 0,8941), aunque t-SNE no se utilizó para entrenar los clusters.
+
+En la prueba con participantes no vistos, K-means alcanzó ARI 0,4749 y NMI 0,6143; GMM obtuvo ARI 0,4483 y NMI 0,6022. La estructura se transfiere parcialmente entre usuarios, pero no identifica de forma fiable las seis actividades.
+
+**Notebook:** `notebooks/04_no_supervisado.ipynb`.
+
+Los resultados reproducibles se encuentran en `resultados_no_supervisado/`.
 
 ## 7. Estructura del proyecto
 
@@ -112,6 +138,15 @@ evaluacion 4/
 │   ├── metricas_validacion.csv
 │   ├── metricas_prueba.csv
 │   └── predicciones_test.csv
+│
+├── resultados_no_supervisado/
+│   ├── metricas_agrupamiento.csv
+│   ├── silhouette_por_k.csv
+│   ├── correspondencia_estatica_dinamica_k2.csv
+│   ├── metricas_generalizacion.csv
+│   ├── composicion_clusters.csv
+│   ├── composicion_estatica_dinamica.csv
+│   └── asignaciones_clusters.csv
 │
 └── data/
     └── (dataset original y datos procesados, no incluidos en GitHub)
@@ -136,7 +171,7 @@ pip install numpy pandas matplotlib seaborn scipy scikit-learn jupyter
    - `03_supervisado.ipynb`: entrenamiento, evaluación y comparación de los modelos de clasificación.
    - `04_no_supervisado.ipynb`: descubrimiento de agrupaciones y patrones.
 
-5. Consultar los resultados generados en la carpeta `resultados_supervisado/`.
+5. Consultar los resultados generados en `resultados_supervisado/` y `resultados_no_supervisado/`.
 
 **Nota:** El dataset original y los archivos intermedios de procesamiento se excluyen del repositorio mediante `.gitignore`. Los notebooks y resultados necesarios para documentar el análisis sí se conservan en GitHub.
 
@@ -148,7 +183,11 @@ En el componente supervisado, la Regresión Logística obtuvo un Accuracy del 94
 
 Estos resultados muestran que las señales de movimiento contienen información útil para reconocer actividades humanas y que la dificultad de clasificación depende de la similitud entre las categorías.
 
-Las conclusiones generales del proyecto se complementarán una vez finalizado el componente no supervisado, con el propósito de contrastar los resultados de ambos enfoques de aprendizaje automático.
+El componente no supervisado confirmó que la separación dominante del conjunto es estática frente a dinámica: los dos clusters de K-means corresponden en 99,85 % con esas categorías. En cambio, al exigir seis grupos, la correspondencia uno a uno disminuye a cerca del 60 %. Sin etiquetas, los algoritmos descubren bien el nivel general de movimiento, pero no reconstruyen por completo el significado de cada actividad.
+
+Los dos enfoques coinciden en las dificultades principales. En supervisado, los errores se concentran entre `SITTING` y `STANDING` y entre actividades dinámicas parecidas; en no supervisado, esas mismas actividades comparten clusters. La Regresión Logística sigue siendo la alternativa más adecuada si el objetivo es nombrar una de las seis actividades, mientras el agrupamiento es útil para explorar estructura, segmentar patrones o detectar categorías amplias sin anotaciones.
+
+La generalización se evaluó con personas diferentes entre entrenamiento y prueba, pero el dataset utiliza un único modelo de teléfono, una posición fija en la cintura y un protocolo controlado. Los resultados no garantizan igual desempeño con otros dispositivos, ubicaciones, orientaciones, poblaciones o actividades no contempladas.
 
 
 

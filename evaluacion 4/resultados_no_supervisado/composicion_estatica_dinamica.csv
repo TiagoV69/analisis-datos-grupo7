@@ -1,0 +1,13 @@
+Algoritmo,cluster,proporcion_dinamica,proporcion_estatica
+K-means,0,0.0,1.0
+K-means,1,0.9927919269581932,0.007208073041806823
+K-means,2,0.0,1.0
+K-means,3,1.0,0.0
+K-means,4,0.0,1.0
+K-means,5,1.0,0.0
+Mezcla gaussiana,0,0.0,1.0
+Mezcla gaussiana,1,1.0,0.0
+Mezcla gaussiana,2,0.0,1.0
+Mezcla gaussiana,3,1.0,0.0
+Mezcla gaussiana,4,0.0,1.0
+Mezcla gaussiana,5,0.9994359842075579,0.0005640157924421884
